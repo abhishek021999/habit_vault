@@ -1,0 +1,15 @@
+{
+  "name": "habitvault",
+  "version": "1.0.0",
+  "description": "A daily habit tracker with visual streaks",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "server": "cd backend && npm run dev",
+    "client": "cd client && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd backend && npm install && cd ../client && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.1"
+  }
+} 
