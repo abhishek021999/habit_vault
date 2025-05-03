@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post('https://habit-vault-backend.onrender.com/api/auth/login', {
+      const res = await axios.post('https://habit-vault-backend-7q8b.onrender.com/api/auth/login', {
         email,
         password
       });
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      const res = await axios.post('https://habit-vault-backend.onrender.com/api/auth/register', {
+      const res = await axios.post('https://habit-vault-backend-7q8b.onrender.com/api/auth/register', {
         name,
         email,
         password
