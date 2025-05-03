@@ -145,7 +145,7 @@ const HabitCard = ({ habit, onDelete, onComplete }) => {
               <span className="text-muted ms-1">day streak</span>
             </div>
             <div>
-              <span className="text-muted me-1">Best:</span>
+              <span className="text-muted me-1">Longest Streak:</span>
               <span className="fw-bold text-primary">{habit.longestStreak}</span>
             </div>
           </div>
