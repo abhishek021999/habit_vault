@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../config/axios';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const HabitCard = ({ habit, onDelete, onComplete }) => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Find today's entry
   const today = new Date();
@@ -36,6 +39,9 @@ const HabitCard = ({ habit, onDelete, onComplete }) => {
     if (!isTargetDay) return;
     const token = localStorage.getItem('token');
     if (!token) return;
+    
+    setLoading(true);
+    setError('');
     let newStatus;
     if (todayStatus === 'unmarked' || todayStatus === 'missed') {
       newStatus = true;
@@ -48,7 +54,10 @@ const HabitCard = ({ habit, onDelete, onComplete }) => {
       });
       onComplete && onComplete();
     } catch (err) {
+      setError('Failed to update habit completion');
       console.error('Failed to update habit completion:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,21 +65,29 @@ const HabitCard = ({ habit, onDelete, onComplete }) => {
     if (!isTargetDay) return;
     const token = localStorage.getItem('token');
     if (!token) return;
+    
+    setLoading(true);
+    setError('');
     try {
       await axios.put(`/api/habits/${habit._id}/complete`, { completed: false }, {
         headers: { 'x-auth-token': token }
       });
       onComplete && onComplete();
     } catch (err) {
+      setError('Failed to mark habit as missed');
       console.error('Failed to mark habit as missed:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async () => {
+    setLoading(true);
+    setError('');
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No authentication token found');
+        setError('No authentication token found');
         return;
       }
       await axios.delete(`/api/habits/${habit._id}`, {
@@ -78,7 +95,10 @@ const HabitCard = ({ habit, onDelete, onComplete }) => {
       });
       onDelete(habit._id);
     } catch (err) {
+      setError('Failed to delete habit');
       console.error('Failed to delete habit:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,12 +127,14 @@ const HabitCard = ({ habit, onDelete, onComplete }) => {
   return (
     <div className="card shadow-sm rounded-4 h-100">
       <div className="card-body pb-3">
+        {error && <div className="alert alert-danger">{error}</div>}
         <div className="d-flex justify-content-between align-items-start mb-2">
           <h5 className="card-title mb-0">{habit.name}</h5>
-          <div>
+          <div className="btn-group">
             <button
               className="btn btn-outline-primary btn-sm me-2"
               onClick={handleEdit}
+              disabled={loading}
               title="Edit Habit"
             >
               <i className="fas fa-edit"></i>
@@ -120,9 +142,10 @@ const HabitCard = ({ habit, onDelete, onComplete }) => {
             <button
               className="btn btn-outline-danger btn-sm"
               onClick={handleDelete}
+              disabled={loading}
               title="Delete Habit"
             >
-              <i className="fas fa-trash"></i>
+              {loading ? <LoadingSpinner size="sm" /> : <i className="fas fa-trash"></i>}
             </button>
           </div>
         </div>
@@ -168,15 +191,16 @@ const HabitCard = ({ habit, onDelete, onComplete }) => {
               <button
                 className={`btn btn-${todayStatus === 'completed' ? 'outline-success' : 'success'} btn-sm rounded-pill px-3`}
                 onClick={handleToggleStatus}
+                disabled={loading}
               >
-                {todayStatus === 'completed' ? 'Undo' : 'Mark Completed'}
+                {loading ? <LoadingSpinner size="sm" /> : todayStatus === 'completed' ? 'Undo' : 'Mark Completed'}
               </button>
               <button
                 className={`btn btn-${todayStatus === 'missed' ? 'outline-danger' : 'danger'} btn-sm rounded-pill px-3`}
                 onClick={handleMarkMissed}
-                disabled={todayStatus === 'missed'}
+                disabled={todayStatus === 'missed' || loading}
               >
-                Mark Missed
+                {loading ? <LoadingSpinner size="sm" /> : 'Mark Missed'}
               </button>
             </div>
           ) : (

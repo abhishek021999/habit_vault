@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from '../../config/axios';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const EditHabitForm = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ const EditHabitForm = () => {
     startDate: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -18,6 +21,7 @@ const EditHabitForm = () => {
         const token = localStorage.getItem('token');
         if (!token) {
           setError('No authentication token found');
+          setLoading(false);
           return;
         }
 
@@ -34,6 +38,8 @@ const EditHabitForm = () => {
         });
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch habit details');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -59,6 +65,8 @@ const EditHabitForm = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setSubmitting(true);
+    setError('');
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -74,6 +82,8 @@ const EditHabitForm = () => {
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update habit');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -86,6 +96,10 @@ const EditHabitForm = () => {
     { value: 5, label: 'Friday' },
     { value: 6, label: 'Saturday' }
   ];
+
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
+  }
 
   return (
     <div className="container mt-5">
@@ -145,13 +159,18 @@ const EditHabitForm = () => {
                 </div>
 
                 <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-primary">
-                    Update Habit
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={submitting}
+                  >
+                    {submitting ? <LoadingSpinner size="sm" /> : 'Update Habit'}
                   </button>
                   <button
                     type="button"
                     className="btn btn-secondary"
                     onClick={() => navigate('/dashboard')}
+                    disabled={submitting}
                   >
                     Cancel
                   </button>

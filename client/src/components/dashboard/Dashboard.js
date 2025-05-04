@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from '../../config/axios';
 import HabitCard from './HabitCard';
 import AddHabitForm from './AddHabitForm';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const Dashboard = () => {
   const [habits, setHabits] = useState([]);
@@ -15,6 +16,7 @@ const Dashboard = () => {
 
   const fetchHabits = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) {
         setError('No authentication token found');
@@ -28,9 +30,9 @@ const Dashboard = () => {
         }
       });
       setHabits([...res.data]);
-      setLoading(false);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch habits');
+    } finally {
       setLoading(false);
     }
   };
@@ -48,13 +50,7 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen />;
   }
 
   if (error) {

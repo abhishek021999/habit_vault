@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from '../../config/axios';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const AddHabitForm = ({ onHabitAdded, onClose }) => {
   const [formData, setFormData] = useState({
@@ -8,6 +9,7 @@ const AddHabitForm = ({ onHabitAdded, onClose }) => {
     startDate: new Date().toISOString().split('T')[0]
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -28,6 +30,8 @@ const AddHabitForm = ({ onHabitAdded, onClose }) => {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -49,6 +53,8 @@ const AddHabitForm = ({ onHabitAdded, onClose }) => {
       onHabitAdded();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add habit');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,17 +132,21 @@ const AddHabitForm = ({ onHabitAdded, onClose }) => {
             />
           </div>
 
-          <div className="d-flex justify-content-end gap-2">
+          <div className="mt-3">
+            <button
+              type="submit"
+              className="btn btn-primary me-2"
+              disabled={loading}
+            >
+              {loading ? <LoadingSpinner size="sm" /> : 'Add Habit'}
+            </button>
             <button
               type="button"
-              className="btn btn-outline-secondary"
+              className="btn btn-secondary"
               onClick={onClose}
+              disabled={loading}
             >
               Cancel
-            </button>
-            <button type="submit" className="btn btn-primary">
-              <i className="fas fa-plus me-2"></i>
-              Add Habit
             </button>
           </div>
         </form>
